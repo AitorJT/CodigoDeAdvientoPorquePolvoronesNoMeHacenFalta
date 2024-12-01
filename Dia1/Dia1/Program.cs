@@ -3,7 +3,8 @@
 List<int> listaIzq = new List<int>();
 List<int> listaDer = new List<int>();
 int distanciaTotal = 0;
-
+int similarityScore = 0;
+Console.WriteLine("Parte 1");
 try{
     foreach(string linea in File.ReadLines(rutaInput)){
         //RemoveEmptyEntries porque hay varios espacios de separacion
@@ -22,6 +23,11 @@ listaDer.Sort();
 
 for(int i = 0; i< listaIzq.Count;i++){
     distanciaTotal += Math.Abs(listaIzq[i] - listaDer[i]);
+
+    int ocurrencias = listaDer.Count(x => x==listaIzq[i]);
+    similarityScore += listaIzq[i] * ocurrencias;
 }
 
 Console.WriteLine($"En teoría la solución para la distancia total debería ser esta: {distanciaTotal}");
+Console.WriteLine($"Confio en que la solucion para la similarity score sea: {similarityScore}");
+
