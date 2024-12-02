@@ -5,9 +5,7 @@ int validReports = 0;
 
 foreach(string linea in File.ReadLines(rutaInput)){
 
-    bool creciente = true;
-    bool decreciente = true;
-    bool incrementoValido = false;
+    
     bool dampenerUsado = false;
     bool reporteValido = true;
 
@@ -16,59 +14,76 @@ foreach(string linea in File.ReadLines(rutaInput)){
 
     for(int i = 1; i < levels.Length; i++){
 
-        if(levels[i] < levels[i-1]){
-            creciente = false;
-        }
-        if(levels[i] > levels[i-1]){
-            decreciente = false;
-        }
+        bool creciente = levels[i] > levels[i-1];
+        bool decreciente = levels[i] < levels[i-1];
+        bool incrementoValido = CalcularIncrementoValido(levels[i-1], levels[i]);
 
-        incrementoValido = CalcularIncrementoValido(levels[i-1], levels[i]);
-
-        if(!creciente && !decreciente && !incrementoValido){
-           //Pido perdón
+        if(!incrementoValido || (!creciente && !decreciente)){
+           
            if(dampenerUsado){
-                creciente = false;
-                decreciente = false;
+                reporteValido = false;
                 break;  
-           }else{
-                dampenerUsado = true;
-
-                //reseteamos condiciones y reevaluamos sin este elemento en el array
-                creciente = true;
-                decreciente = true;
-                for(int j =1; j < levels.Length; j++){
-                    //skipeamos el elemento que dio problemas
-                    if(i==j){
-                        continue;
-                    }
-                    if(levels[j] < levels[j-1]){
-                        creciente = false;
-                    }
-                    if(levels[j] > levels[j-1]){
-                        decreciente = false;
-                    }
-
-                    //Si sigue sin ser valido salimos
-                    if(!creciente && !decreciente){
-                        break;
-                    }
-                }
            }
+
+            dampenerUsado = true;
+            reporteValido = false;
+
+                
+            // Intentar omitir cada nivel una vez
+            for (int indiceIgnorado = 0; indiceIgnorado < levels.Length; indiceIgnorado++)
+            {
+                //Pido perdón
+                if (EsValidoConDampener(levels, indiceIgnorado))
+                {
+                    reporteValido = true;
+                    break;
+                }
+            }
+
+            if (!reporteValido) break; 
             
         }
-        if(!creciente && !decreciente && !incrementoValido &&dampenerUsado){
-            break;
-        }
-        
     }
 
-    if(incrementoValido && (creciente || decreciente)){
+    if(reporteValido ){
             validReports ++;
     }
 
 }
+//Funcion que reevalua el array pero la posicion ignorar no se evalua 
+static bool EsValidoConDampener(int[] levels, int ignorar)
+{
+    bool creciente = true;
+    bool decreciente = true;
+    int indiceAnterior = -1;
 
+    for (int i = 0; i < levels.Length; i++)
+    {
+        // Ignorar índice actual
+        if (i == ignorar){
+            continue; 
+        } 
+
+        if(indiceAnterior != -1){
+            bool incrementoValido = CalcularIncrementoValido(levels[indiceAnterior], levels[i]);
+            if (!incrementoValido){
+                return false;
+            }
+            if (levels[i] < levels[indiceAnterior]){
+                creciente = false;
+            }
+                
+            if (levels[i] > levels[indiceAnterior]){
+                decreciente = false;
+            }
+        }
+
+        indiceAnterior = i;
+        
+    }
+
+    return creciente || decreciente;
+}
 static bool CalcularIncrementoValido(int anterior, int actual){
 
     if(Math.Abs(anterior - actual) == 0 || Math.Abs(anterior - actual) > 3){
