@@ -8,7 +8,8 @@ foreach(string linea in File.ReadLines(rutaInput)){
     bool creciente = true;
     bool decreciente = true;
     bool incrementoValido = false;
-
+    bool dampenerUsado = false;
+    bool reporteValido = true;
 
     string[] levelsSplitted = linea.Split(' ', StringSplitOptions.RemoveEmptyEntries); 
     int[] levels = Array.ConvertAll(levelsSplitted,int.Parse);
@@ -21,12 +22,42 @@ foreach(string linea in File.ReadLines(rutaInput)){
         if(levels[i] > levels[i-1]){
             decreciente = false;
         }
-        if(!creciente && !decreciente){
-            break;
-        }
 
         incrementoValido = CalcularIncrementoValido(levels[i-1], levels[i]);
-        if(!incrementoValido){
+
+        if(!creciente && !decreciente && !incrementoValido){
+           //Pido perdón
+           if(dampenerUsado){
+                creciente = false;
+                decreciente = false;
+                break;  
+           }else{
+                dampenerUsado = true;
+
+                //reseteamos condiciones y reevaluamos sin este elemento en el array
+                creciente = true;
+                decreciente = true;
+                for(int j =1; j < levels.Length; j++){
+                    //skipeamos el elemento que dio problemas
+                    if(i==j){
+                        continue;
+                    }
+                    if(levels[j] < levels[j-1]){
+                        creciente = false;
+                    }
+                    if(levels[j] > levels[j-1]){
+                        decreciente = false;
+                    }
+
+                    //Si sigue sin ser valido salimos
+                    if(!creciente && !decreciente){
+                        break;
+                    }
+                }
+           }
+            
+        }
+        if(!creciente && !decreciente && !incrementoValido &&dampenerUsado){
             break;
         }
         
